@@ -1,0 +1,17 @@
+@import "tailwindcss";
+
+@layer theme {
+  :root {
+    --color-primary: #5f6FFF;
+  }
+}
+
+@layer utilities {
+  .bg-primary {
+    background-color: var(--color-primary);
+  }
+
+  .text-primary {
+    color: var(--color-primary);
+  }
+}
