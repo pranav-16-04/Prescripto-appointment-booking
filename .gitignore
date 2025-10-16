@@ -1,6 +1,5 @@
 # Ignore environment files everywhere
 **/.env
-
 # Node modules
 **/node_modules/
 
