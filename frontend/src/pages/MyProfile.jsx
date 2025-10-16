@@ -1,25 +1,58 @@
 import React, { useState } from 'react'
+import { useContext } from 'react'
+import { AppContext } from '../context/AppContext'
 import { assets } from '../assets/assets'
+import axios from 'axios'
+import { toast } from 'react-toastify'
 
 const MyProfile = () => {
-  const [userData, setUserData] = useState({
-    name: "Penugonda Giri Pranav",
-    image: assets.profile_pic,
-    email: "penugondagiripranav@gmail.com",
-    phone: "(+91) 7382155743",
-    address: {
-      line1: "Sampath Nagar",
-      line2: "Main Road"
-    },
-    gender: 'Male',
-    dob: '2004-12-16'
-
-  })
+  const {userData, setUserData, backendUrl, token,loadUserProfileData} = useContext(AppContext)
   const [isEdit, setIsEdit] = useState(false)
+  const [image,setImage] = useState(false)
+  const updateUserProfileData = async () => {
+    try {
+      const formData = new FormData()
 
-  return (
+      formData.append('name',userData.name)
+      formData.append('phone',userData.phone)
+      formData.append('address',JSON.stringify(userData.address))
+      formData.append('gender',userData.gender)
+      formData.append('dob',userData.dob)
+
+      image && formData.append('image',image)
+      const {data} = await axios.post(backendUrl+'/api/user/update-profile',formData,{headers:{token}})
+      
+      if(data.success){
+        toast.success(data.message)
+        await loadUserProfileData()
+        setIsEdit(false)
+        setImage(false)
+      }
+      else{
+        toast.error(data.message)
+      }
+      
+    } catch (error) {
+      console.error(error)
+      toast.error(error.message)
+    }
+  }
+
+  return userData && (
     <div className='max-w-lg flex flex-col gap-2 text-sm'>
-      <img className='w-36 rounded' src={userData.image} alt="" />
+      
+      {
+        isEdit
+        ?<label htmlFor='image'>
+            <div className='inline-block relative cursor-pointer'>
+              <img className='w-36 rounded opacity-75' src={image ? URL.createObjectURL(image):userData.image} alt="" />
+              <img className='w-10 absolute bottom-12 right-12' src={image ? '':assets.upload_icon} alt="" />
+            </div>
+            <input onChange={(e)=>setImage(e.target.files[0])} type="file" id='image' hidden />
+        </label>
+        :<img className='w-36 rounded' src={userData.image} alt="" />
+
+      }
 
       {
         isEdit
@@ -43,15 +76,32 @@ const MyProfile = () => {
           {
             isEdit
               ? <p>
-                <input className='bg-gray-100' onChange={(e) => setUserData(prev => ({ ...prev.address, line1: e.target.value }))} value={userData.address.line1} type="text" />
+                <input 
+                  className='bg-gray-100 w-full mb-2' 
+                  onChange={(e) => setUserData(prev => ({ 
+                    ...prev, 
+                    address: { ...prev.address, line1: e.target.value }
+                  }))} 
+                  value={userData.address?.line1 || ''} 
+                  type="text"
+                  placeholder="Address Line 1"
+                />
                 <br />
-                <input className='bg-gray-100' onChange={(e) => setUserData(prev => ({ ...prev.address, line2: e.target.value }))} value={userData.address.line2} type="text" />
+                <input 
+                  className='bg-gray-100 w-full' 
+                  onChange={(e) => setUserData(prev => ({ 
+                    ...prev, 
+                    address: { ...prev.address, line2: e.target.value }
+                  }))} 
+                  value={userData.address?.line2 || ''} 
+                  type="text"
+                  placeholder="Address Line 2"
+                />
               </p>
               : <p className='text-gray-500'>
-                {userData.address.line1}
+                {userData.address?.line1 || 'No address provided'}
                 <br />
-                {userData.address.line2}
-
+                {userData.address?.line2}
               </p>
           }
         </div>
@@ -78,8 +128,18 @@ const MyProfile = () => {
       <div className='mt-10'>
         {
           isEdit
-          ?<button className='border border-[#5f6FFF] px-8 py-2 rounded-full hover:bg-[#5f6FFF] hover:text-white transition-all' onClick={()=>setIsEdit(false)}>Save information</button>
-          :<button className='border border-[#5f6FFF] px-8 py-2 rounded-full hover:bg-[#5f6FFF] hover:text-white transition-all' onClick={()=>setIsEdit(true)}>Edit</button>
+          ? <button 
+              className='border border-[#5f6FFF] px-8 py-2 rounded-full hover:bg-[#5f6FFF] hover:text-white transition-all' 
+              onClick={updateUserProfileData}
+            >
+              Save information
+            </button>
+          : <button 
+              className='border border-[#5f6FFF] px-8 py-2 rounded-full hover:bg-[#5f6FFF] hover:text-white transition-all' 
+              onClick={()=>setIsEdit(true)}
+            >
+              Edit
+            </button>
         }
       </div>
     </div>

@@ -14,4 +14,16 @@
   .text-primary {
     color: var(--color-primary);
   }
+  .border-primary{
+    color: var(--color-primary);
+  }
+}
+
+
+::-webkit-scrollbar {
+  display: none;
+}
+
+*{
+  font-family: 'Outfit';
 }

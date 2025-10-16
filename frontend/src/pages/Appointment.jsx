@@ -1,15 +1,17 @@
 import React, { useContext, useEffect, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { AppContext } from '../context/AppContext'
 import { assets } from '../assets/assets'
 import RelatedDoctors from '../components/RelatedDoctors'
+import { toast } from 'react-toastify'
 
 const Appointment = () => {
   const {docId}=useParams()
-  const {doctors,currencySymbol}=useContext(AppContext)
+  const {doctors,currencySymbol,backendUrl,token,getDoctorData}=useContext(AppContext)
   const daysOfWeek=['SUN','MON','TUE','WED','THU','FRI','SAT']
   const [docInfo,setDocInfo]=useState(null)
 
+  const navigate = useNavigate()
   const [docSlots,setDocSlots]=useState([])
   const [slotIndex,setSlotIndex]=useState(0)
   const [slotTime,setSlotTime]=useState('')
@@ -69,6 +71,14 @@ const Appointment = () => {
     }
   }
 
+  const bookAppointment = async()=>{
+    if(!token){
+      toast.warn('Login to Book Appointment')
+      return navigate('/login')
+    }
+
+  }
+
   return docInfo && (
     <div>
       {/*-----------------Doctor Details--------------*/ }
@@ -116,7 +126,7 @@ const Appointment = () => {
             </p>
           ))}
         </div>
-        <button className='bg-[#5f6FFF] text-white text-sm font-light px-14 py-3 rounded-full my-6'>Book and Appointment</button>
+        <button onClick={bookAppointment} className='bg-[#5f6FFF] text-white text-sm font-light px-14 py-3 rounded-full my-6'>Book and Appointment</button>
       </div>
 
       {/*-----Listing Related Doctors-----*/}
